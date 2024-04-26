@@ -286,9 +286,6 @@ int changeFilePermissions() {
 
     separatePathAndFileName(filename, path, fileName);
 
-    printf("Enter permission mode (e.g., 0644): ");
-    scanf("%o", &mode);
-
     struct stat st;
     char fullPath[256]; 
     
@@ -298,11 +295,20 @@ int changeFilePermissions() {
         sprintf(fullPath, "%s/%s", showPath(), filename);
     }
 
+     if (access(fullPath, F_OK) != 0) {
+        printf("Can't Found this File\n");
+        return -1;
+    } else {
+        printf("File '%s' exists.\n", fullPath);
+    }
+
     if (stat(fullPath, &st) != 0) {
         perror("stat");
         return -1;
     } else {
         printf("File '%s' exists.\n", fullPath);
+        printf("Enter permission mode (e.g., 0644): ");
+        scanf("%o", &mode);
     }
 
     if (chmod(fullPath, mode) != 0) {

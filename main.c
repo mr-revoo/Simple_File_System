@@ -275,6 +275,13 @@ void showMenu(){
 
 }
 
+int isValidMode(mode_t mode) {
+    if (mode >= 0 && mode <= 0777)
+        return 1;
+    else 
+        return 0;
+}
+
 int changeFilePermissions() {
     char filename[100]; 
     char path[100]; 
@@ -288,27 +295,31 @@ int changeFilePermissions() {
 
     struct stat st;
     char fullPath[256]; 
-    
+
     if (filename[0] == '/') {
         strcpy(fullPath, filename);
     } else {
         sprintf(fullPath, "%s/%s", showPath(), filename);
     }
 
-     if (access(fullPath, F_OK) != 0) {
+    if (access(fullPath, F_OK) != 0) {
         printf("Can't Found this File\n");
         return -1;
     } else {
         printf("File '%s' exists.\n", fullPath);
     }
 
+    printf("Enter permission mode (e.g., 0644): ");
+    scanf("%o", &mode);
+
+    if (!isValidMode(mode)) {
+        printf("Invalid permission mode.\n");
+        return -1;
+    }
+
     if (stat(fullPath, &st) != 0) {
         perror("stat");
         return -1;
-    } else {
-        printf("File '%s' exists.\n", fullPath);
-        printf("Enter permission mode (e.g., 0644): ");
-        scanf("%o", &mode);
     }
 
     if (chmod(fullPath, mode) != 0) {
@@ -370,8 +381,7 @@ int main()
                 break;
             default:
                 printf("invalid choice\n");
-                break;
         }
-    } while(choice !=10);
+    } while(choice != 10);
     return 0;
 }

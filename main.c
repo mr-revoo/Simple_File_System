@@ -312,9 +312,11 @@ void changeFilePermissions(){
             printf("Permissions changed successfully for file '%s'.\n", filename);
         } else {
             printf("Failed to change permissions for file '%s'.\n", filename);
+            return ;
         }
     } else {
         printf("Permission change canceled.\n");
+        return;
     }
 }
 

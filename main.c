@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include "assistFile.c"
 
+#define NAME_LENGTH 50
+
 void listFile()
 {
     char filePath[100] , command[200] , valid;
@@ -282,54 +284,38 @@ int isValidMode(mode_t mode) {
         return 0;
 }
 
-int changeFilePermissions() {
-    char filename[100]; 
-    char path[100]; 
-    char fileName[100]; 
-    mode_t mode;
+void changeFilePermissions(){
+    char filename[50];
+    char command[100];
+    char permission[100];
+    char confirm;
 
-    printf("Enter filename: ");
+    printf("Enter the filename: ");
     scanf("%s", filename);
 
-    separatePathAndFileName(filename, path, fileName);
+    printf("The permissions of file '%s' are:\n", filename);
+    snprintf(command, 50, "stat -c '%%A' \"%s\"", filename);
+    system(command);
 
-    struct stat st;
-    char fullPath[256]; 
+    printf("\nDo you want to change the permission of the file? (y/n): ");
+    scanf(" %c", &confirm);
 
-    if (filename[0] == '/') {
-        strcpy(fullPath, filename);
+    if (confirm == 'y' || confirm == 'Y') {
+        printf("\nr : read\nw : write\nx : execute\n(e.g., u+rw, g-w, a+x):\n");
+        printf("\nEnter the new permissions: ");
+        scanf("%s", permission);
+
+        snprintf(command, 50, "chmod %s \"%s\"", permission, filename);
+        int status = system(command);
+
+        if (status == 0) {
+            printf("Permissions changed successfully for file '%s'.\n", filename);
+        } else {
+            printf("Failed to change permissions for file '%s'.\n", filename);
+        }
     } else {
-        sprintf(fullPath, "%s/%s", showPath(), filename);
+        printf("Permission change canceled.\n");
     }
-
-    if (access(fullPath, F_OK) != 0) {
-        printf("Can't Found this File\n");
-        return -1;
-    } else {
-        printf("File '%s' exists.\n", fullPath);
-    }
-
-    printf("Enter permission mode (e.g., 0644): ");
-    scanf("%o", &mode);
-
-    if (!isValidMode(mode)) {
-        printf("Invalid permission mode.\n");
-        return -1;
-    }
-
-    if (stat(fullPath, &st) != 0) {
-        perror("stat");
-        return -1;
-    }
-
-    if (chmod(fullPath, mode) != 0) {
-        perror("chmod");
-        return -1;
-    } else {
-        printf("Permissions of file '%s' changed successfully.\n", fullPath);
-    }
-
-    return 0;
 }
 
 
@@ -370,11 +356,7 @@ int main()
                 printf("The Current Path is : %s\n",showPath());
                 break;
             case 9:
-                if (changeFilePermissions() == 0) {
-                    printf("Permissions changed successfully.\n");
-                } else {
-                    printf("Failed to change permissions.\n");
-                }
+                changeFilePermissions();
                 break;
             case 10:
                 return 0;
